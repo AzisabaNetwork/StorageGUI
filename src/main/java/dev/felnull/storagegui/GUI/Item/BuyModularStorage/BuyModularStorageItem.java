@@ -19,6 +19,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,14 +27,15 @@ import java.util.Set;
 public class BuyModularStorageItem extends GUIItem {
     public StorageData storageData;
     public int inventoryNumber;
-    public int rowCount = 6; // 固定行数
-    public int pricePerRow = 50;
-    int basePrice = inventoryNumber * rowCount * pricePerRow;
+    private final int rowCount = 6; // 固定行数
+    private final int pricePerRow = 50;
+    private final int basePrice;
 
     public BuyModularStorageItem(InventoryGUI gui, StorageData storageData, int inventoryNumber) {
         super(gui, new ItemStack(Material.CHEST));
         this.storageData = storageData;
         this.inventoryNumber = inventoryNumber;
+        this.basePrice = inventoryNumber * rowCount * pricePerRow;
         setDisplayName(String.valueOf(basePrice) + "$でストレージを購入する!");
     }
 
@@ -41,14 +43,16 @@ public class BuyModularStorageItem extends GUIItem {
     public void onClick(InventoryClickEvent e) {
         Economy economy = StorageGUI.economy;
         OfflinePlayer player = (OfflinePlayer) e.getWhoClicked();
-        
+
         // 0〜2番のストレージは無料
         boolean isFree = inventoryNumber <= 2;
         int finalPrice = isFree ? 0 : basePrice;
 
         if (!isFree && !economy.has(player, finalPrice)) {
             double lack = finalPrice - economy.getBalance(player);
-            player.getPlayer().sendMessage("お金が " + lack + "$ 足りません! 現在: " + economy.getBalance(player) + "$");
+            NumberFormat num = NumberFormat.getInstance();
+            num.setMaximumFractionDigits(2);
+            player.getPlayer().sendMessage("お金が " + num.format(lack) + "$ 足りません! 現在: " + num.format(economy.getBalance(player)) + "$");
             return;
         }
 
