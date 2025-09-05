@@ -26,23 +26,22 @@ import java.util.Set;
 public class BuyModularStorageItem extends GUIItem {
     public StorageData storageData;
     public int inventoryNumber;
+    public int rowCount = 6; // 固定行数
+    public int pricePerRow = 50;
+    int basePrice = inventoryNumber * rowCount * pricePerRow;
 
     public BuyModularStorageItem(InventoryGUI gui, StorageData storageData, int inventoryNumber) {
         super(gui, new ItemStack(Material.CHEST));
         this.storageData = storageData;
         this.inventoryNumber = inventoryNumber;
-        setDisplayName(String.valueOf(inventoryNumber * 50) + "$でストレージを購入する!");
+        setDisplayName(String.valueOf(basePrice) + "$でストレージを購入する!");
     }
 
     @Override
     public void onClick(InventoryClickEvent e) {
         Economy economy = StorageGUI.economy;
         OfflinePlayer player = (OfflinePlayer) e.getWhoClicked();
-
-        int rowCount = 6; // 固定行数
-        int pricePerRow = 50;
-        int basePrice = inventoryNumber * rowCount * pricePerRow;
-
+        
         // 0〜2番のストレージは無料
         boolean isFree = inventoryNumber <= 2;
         int finalPrice = isFree ? 0 : basePrice;
